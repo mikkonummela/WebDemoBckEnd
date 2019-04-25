@@ -47,15 +47,17 @@ namespace WebDemoBackEnd.Controllers
         //Replicate usernames are still not allowed
         //Returns 1 if the change is valid, or -1 if it isn't
         //Returns 0 if user not found (how did that happen though)
+        //  or if the input key is invalid (-||-)
         [HttpPut]
         [Route("{key}")]
         public int ChangeUser(string key, [FromBody] Users NewData)
         {
+            if (!(int.TryParse(key, out int newkey))) return 0;
             RpkContext context = new RpkContext();
-            Users user = context.Users.Find(int.Parse(key));
+            Users user = context.Users.Find(newkey);
             if (user == null) return 0;
             //Checks for duplicate usernames in users not the one being changed
-            if (context.Users.Any(u => u.UserName == NewData.UserName && u.UserId != int.Parse(key))) return -1;
+            if (context.Users.Any(u => u.UserName == NewData.UserName && u.UserId != newkey)) return -1;
             user.UserName = NewData.UserName;
             user.Password = NewData.Password;
             user.IsDisabled = NewData.IsDisabled;
