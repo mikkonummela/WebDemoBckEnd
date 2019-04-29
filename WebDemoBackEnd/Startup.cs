@@ -25,19 +25,30 @@ namespace WebDemoBackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            // Add service and create Policy with options
+            services.AddCors(options => //<--- tärkeä CORS-määritys, jotta samassa koneessa voisi ajaa backendiä ja fronttia
+            {
+                options.AddPolicy("MyCorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            // global policy - assign here or on each controller
+            app.UseCors("MyCorsPolicy"); //<--- tärkeä CORS-määritys, jotta samassa koneessa voisi ajaa backendiä ja fronttia
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
